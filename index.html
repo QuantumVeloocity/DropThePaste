@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PasteBin Minimal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: #0f0f0f;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 40px 0;
+      animation: fadeIn 1s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #d9b3ff;
+      font-size: 2rem;
+    }
+
+    textarea {
+      width: 80%;
+      max-width: 800px;
+      height: 200px;
+      padding: 15px;
+      margin-bottom: 20px;
+      background: #1c1c1c;
+      color: #e0e0e0;
+      border: none;
+      border-radius: 10px;
+      resize: vertical;
+      font-size: 1rem;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      background-color: #b57eff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #9d5eff;
+    }
+
+    .paste-list {
+      width: 80%;
+      max-width: 800px;
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .paste-item {
+      background: #222;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .paste-item pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #e0e0e0;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #b57eff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>QuickPaste</h1>
+  <textarea id="inputText" placeholder="Write your paste here..."></textarea>
+  <div class="buttons">
+    <button onclick="storePaste()">Paste</button>
+  </div>
+  <div class="paste-list" id="pasteList"></div>
+
+  <script>
+    const STORAGE_KEY = "lofiPastes";
+
+    function loadPastes() {
+      const pasteList = document.getElementById("pasteList");
+      pasteList.innerHTML = "";
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const pastes = JSON.parse(stored);
+        pastes.forEach((paste, index) => {
+          const div = document.createElement("div");
+          div.className = "paste-item";
+
+          const pre = document.createElement("pre");
+          pre.textContent = paste;
+          div.appendChild(pre);
+
+          const copyBtn = document.createElement("button");
+          copyBtn.textContent = "Copy";
+          copyBtn.className = "copy-btn";
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(paste);
+            alert("Paste copied to clipboard!");
+          };
+          div.appendChild(copyBtn);
+
+          pasteList.appendChild(div);
+        });
+      }
+    }
+
+    function storePaste() {
+      const input = document.getElementById("inputText").value.trim();
+      if (!input) return;
+
+      let pastes = [];
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) pastes = JSON.parse(stored);
+
+      pastes.unshift(input); // add new paste to top
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pastes));
+
+      document.getElementById("inputText").value = "";
+      loadPastes();
+    }
+
+    // On page load
+    window.onload = loadPastes;
+  </script>
+</body>
+</html>
